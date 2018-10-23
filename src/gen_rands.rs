@@ -1,10 +1,9 @@
 use clap::{App, Arg};
 
 use rand::prelude::*;
-use rand::FromEntropy;
 
 fn main() {
-    let mut rng = SmallRng::from_entropy();
+    let mut rng = thread_rng();
 
     let num_vals: usize = App::new("Random number generator")
         .arg(
