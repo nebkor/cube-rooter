@@ -1,7 +1,20 @@
+cargo-features = ["default-run"]
+
 [package]
-name = "big_sphero"
+name = "big-sphero"
 version = "0.1.0"
 authors = ["Joe Ardent <code@ardent.nebcorp.com>"]
 edition = "2018"
+default-run = "big-sphero"
 
 [dependencies]
+rand = "0.5.5"
+clap = "*"
+
+[[bin]]
+name = "gen-rands"
+path = "src/gen_rands.rs"
+
+[[bin]]
+name = "big-sphero"
+path = "src/main.rs"
