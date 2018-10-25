@@ -9,6 +9,7 @@ const VERSION: &str = "1";
 fn get_args() -> ArgMatches<'static> {
     App::new("Cube Rooter")
         .version(VERSION)
+        .about("Reads a newline-separated sequence or stream of numbers from a file, and displays them next to their [positive] cube roots.")
         .arg(
             Arg::with_name("NUMS_FILE")
                 .help("File to read that contains numbers to cube-root.")
@@ -30,16 +31,11 @@ fn get_args() -> ArgMatches<'static> {
 
 fn get_vals(args: &ArgMatches) -> impl Iterator<Item = f64> {
     let vals_name: &str = args.value_of("NUMS_FILE").unwrap();
-
     let path = Path::new(vals_name);
-
     let f = File::open(&path).unwrap_or_else(|_| panic!("Could not open {:#?}", &path));
-
-    let buf_reader = BufReader::new(f);
-    buf_reader
+    BufReader::new(f)
         .lines()
-        .map(|x| x.unwrap().parse::<f64>())
-        .filter_map(Result::ok)
+        .filter_map(|x| x.unwrap().parse::<f64>().ok())
 }
 
 fn get_rooter(args: &ArgMatches) -> Box<dyn Fn(f64) -> f64> {
@@ -54,7 +50,6 @@ fn main() {
     let rooter = get_rooter(&args);
 
     for v in vals {
-
         println!("{} {}", v, rooter(v));
     }
 }
