@@ -28,19 +28,18 @@ fn get_args() -> ArgMatches<'static> {
         .get_matches()
 }
 
-fn get_vals(args: &ArgMatches) -> Vec<f64> {
+fn get_vals(args: &ArgMatches) -> impl Iterator<Item = f64> {
     let vals_name: &str = args.value_of("NUMS_FILE").unwrap();
 
     let path = Path::new(vals_name);
 
     let f = File::open(&path).unwrap_or_else(|_| panic!("Could not open {:#?}", &path));
 
-    let buf_reader = &mut BufReader::new(&f);
-    let vals: Vec<f64> = buf_reader
+    let buf_reader = BufReader::new(f);
+    buf_reader
         .lines()
         .map(|x| x.unwrap().parse::<f64>())
-        .filter_map(Result::ok).collect();
-    vals
+        .filter_map(Result::ok)
 }
 
 fn get_rooter(args: &ArgMatches) -> Box<dyn Fn(f64) -> f64> {
@@ -54,7 +53,8 @@ fn main() {
     let vals = get_vals(&args);
     let rooter = get_rooter(&args);
 
-    for v in vals.into_iter() {
+    for v in vals {
+
         println!("{} {}", v, rooter(v));
     }
 }
