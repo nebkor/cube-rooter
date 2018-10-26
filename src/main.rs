@@ -23,8 +23,6 @@ const VERSION: &str = "1";
 // 64-bit: ((2.0 * 4503599627370496.0f64 * (1023.0 - 0.035)) as u64) / 3;
 const MAGIC64: u64 = 0x2A9FA06D3A06D3A0;
 
-const ONE_THIRD: f64 = 1.0f64 / 3.0f64;
-
 fn get_args() -> ArgMatches<'static> {
     App::new("Cube Rooter")
         .version(VERSION)
@@ -43,7 +41,7 @@ fn get_args() -> ArgMatches<'static> {
                 .help("Type of cube root function to use.")
                 .index(1)
                 .required(true)
-                .possible_values(&["exact", "approx", "fast-approx", "simd"]),
+                .possible_values(&["exact", "approx", "simd"]),
         )
         .get_matches()
 }
@@ -59,18 +57,7 @@ fn get_vals(args: &ArgMatches) -> impl Iterator<Item = f64> {
 
 fn approx(x: f64) -> f64 {
     let mut i: u64 = x.to_bits();
-    i = (MAGIC64 as f64 + (ONE_THIRD * i as f64)) as u64;
-    f64::from_bits(i)
-}
-
-fn fast_approx(x: f64) -> f64 {
-    let mut i: u64 = x.to_bits();
-    // approximately divide by 3, add to MAGIC; see
-    // http://www.hackersdelight.org/hdcodetxt/acbrt.c.txt
-    i = i / 4 + i / 16;
-    i += i / 16;
-    i += i / 256;
-    i += MAGIC64;
+    i = MAGIC64 + (i / 3);
     f64::from_bits(i)
 }
 
@@ -78,7 +65,6 @@ fn get_rooter(args: &ArgMatches) -> Box<dyn Fn(f64) -> f64> {
     match args.value_of("variant").unwrap() {
         "exact" => Box::new(|x| x.cbrt()),
         "approx" => Box::new(approx),
-        "fast-approx" => Box::new(fast_approx),
         _ => panic!("why did you do this"),
     }
 }
